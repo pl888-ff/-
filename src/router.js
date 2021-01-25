@@ -3,8 +3,15 @@ import Router from 'vue-router'
 
 Vue.use(Router)
 
-export default new Router({
-  routes: [
+const routes = [{
+  path: '/login',
+  name: 'login',
+  component: () =>
+        import ('@/views/login')
+}]
 
-  ]
+const router = new Router({
+  routes
 })
+
+export default router
