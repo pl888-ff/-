@@ -10,7 +10,7 @@ import Vant from 'vant'
 import 'vant/lib/index.css'
 
 // 导入全局样式表
-import './styles/index.less'
+import './style/index.less'
 
 // 动态设置 REM 基准值
 import 'amfe-flexible'
