@@ -24,21 +24,11 @@
         error-text="请求失败，点击重新加载"
         @load="onLoad"
       >
-        <!-- <article-item
-          v-for="(article, index) in list"
-          :key="index"
-          :article="article"
-        /> -->
         <article-item
           v-for="(item, index) in list"
           :key="index"
           :article="item"
         />
-        <!-- <van-cell
-          v-for="(item, index) in list"
-          :key="index"
-          :title="item.title"
-        /> -->
       </van-list>
 
       <!-- /文章列表 -->
@@ -129,7 +119,7 @@ export default {
     //   // setTimeout 仅做示例，真实场景中一般为 ajax 请求
     //   setTimeout(() => {
     //     //  2  吧请求结果数据放到list数组中
-    //     for (let i = 0; i < 10; i++) {
+    //     for (let i = 0; i <script 10; i++) {
     //       this.list.push(this.list.length + 1);
     //     }
 

@@ -29,11 +29,31 @@
         <!-- /子组件插槽 -->
       </van-tab>
       <div slot="nav-right" class="placeholder"></div>
-      <div slot="nav-right" class="hamburger-btn">
+      <div
+        slot="nav-right"
+        class="hamburger-btn"
+        @click="isChennelEditShow = true"
+      >
         <i class="toutiao toutiao-gengduo"></i>
       </div>
     </van-tabs>
     <!-- /【频道；列表 -->
+
+    <!-- 频道编辑弹出层 -->
+    <van-popup
+      v-model="isChennelEditShow"
+      closeable
+      position="bottom"
+      close-icon-position="top-left"
+      :style="{ height: '100%' }"
+    >
+      <channel-edit
+        :my-channels="channels"
+        :active="active"
+        @update-active="onUpdateActive"
+      />
+    </van-popup>
+    <!-- /频道编辑弹出层 -->
   </div>
 </template>
 
@@ -42,12 +62,15 @@ import { getUserChannels } from '@/api/user'
 // 导入文章列表组件
 import ArticleList from './compoent/article-list'
 
+import ChannelEdit from './compoent/channel-edit'
+
 export default {
   name: 'HomeIndex',
   data () {
     return {
       active: 1,
-      channels: [] // 频道列表
+      channels: [], // 频道列表
+      isChennelEditShow: false // 更新频道的展示状态，为false就是关闭
     }
   },
   created () {
@@ -55,7 +78,8 @@ export default {
   },
   components: {
     // 注册组件
-    ArticleList
+    ArticleList,
+    ChannelEdit
   },
   methods: {
     async loadChannels () {
@@ -66,6 +90,14 @@ export default {
       } catch (err) {
         this.$toast('失败')
       }
+    },
+    onUpdateActive (a, isChennelEditShow = true) {
+      // console.log(a);
+      // 更新激活的频道项
+      this.active = a
+
+      // 关闭编辑频道碳层
+      this.isChennelEditShow = isChennelEditShow
     }
   }
 }
