@@ -12,6 +12,9 @@ import 'vant/lib/index.css'
 // 导入全局样式表
 import './style/index.less'
 
+// 加载dayjs初始化配置
+import './utils/dayjs'
+
 // 动态设置 REM 基准值
 import 'amfe-flexible'
 
