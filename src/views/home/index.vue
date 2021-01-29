@@ -9,6 +9,7 @@
         type="info"
         size="small"
         round
+        to="/search"
         >搜索</van-button
       >
     </van-nav-bar>
@@ -64,6 +65,10 @@ import ArticleList from './compoent/article-list'
 
 import ChannelEdit from './compoent/channel-edit'
 
+import { mapState } from 'vuex'
+
+import { getItem } from '@/utils/storage'
+
 export default {
   name: 'HomeIndex',
   data () {
@@ -76,6 +81,9 @@ export default {
   created () {
     this.loadChannels()
   },
+  computed: {
+    ...mapState(['user'])
+  },
   components: {
     // 注册组件
     ArticleList,
@@ -84,14 +92,38 @@ export default {
   methods: {
     async loadChannels () {
       try {
-        const { data } = await getUserChannels()
+        // const { data } = await getUserChannels();
         // console.log(data);
-        this.channels = data.data.channels
+        // this.channels = data.data.channels;
+
+        // 判断登录的状态
+        let channels = []
+        if (this.user) {
+          // 有数据表明是登录状态，
+
+          const { data } = await getUserChannels()
+          channels = data.data.channels
+        } else {
+          // 未登录状态
+          // 判断本地是否有数据，有就用本地的，没有就用获取过来的
+          // 先从本地拿数据
+          const localChannels = getItem('TOUTIAO_CAHNNELS')
+          if (localChannels) {
+            // localChannels有数据就拿本地的数据
+            channels = localChannels
+          } else {
+            // localChannels没数据就调用接口的方法存数据
+            const { data } = await getUserChannels()
+            channels = data.data.channels
+          }
+        }
+
+        this.channels = channels
       } catch (err) {
         this.$toast('失败')
       }
     },
-    onUpdateActive (a, isChennelEditShow = true) {
+    onUpdateActive (a, isChennelEditShow = false) {
       // console.log(a);
       // 更新激活的频道项
       this.active = a

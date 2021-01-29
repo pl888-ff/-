@@ -40,6 +40,12 @@ const routes = [{
                     import ('@/views/my')
             }
         ]
+    },
+    {
+        path: '/search',
+        name: 'search',
+        component: () =>
+            import ('@/views/search') // @指向的是src这个目录
     }
 ]
 

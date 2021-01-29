@@ -56,7 +56,13 @@
 </template>
 
 <script>
-import { getAllChannels } from '@/api/channel'
+import {
+  getAllChannels,
+  addUserChannels,
+  removeUserChannels
+} from '@/api/channel'
+import { mapState } from 'vuex'
+import { setItem } from '@/utils/storage'
 export default {
   name: 'ChannelEdit',
   data () {
@@ -67,6 +73,7 @@ export default {
     }
   },
   computed: {
+    ...mapState(['user']),
     recommendChannels () {
       // 简化写法
       // 数组的fiilter方法会遍历数组，然后返回符合条件的元素存储到新的数组中
@@ -123,10 +130,26 @@ export default {
         this.$toast('请求失败')
       }
     },
-    onAddChannel (channels) {
-      console.log(channels)
+    async onAddChannel (channels) {
+      // console.log(channels)
       // push进myChannels，然后计算属性会自动监听数据的变化，动态渲染
       this.myChannels.push(channels)
+
+      // 数据持久化处理
+      if (this.user) {
+        try {
+          // 已登录，把数据请求接口放到线上
+          addUserChannels({
+            id: channels.id, // 频道ID
+            seq: this.myChannels.length // 序号
+          })
+        } catch (err) {
+          this.$toast('保存失败，请稍后重试')
+        }
+      } else {
+        // 未登录，把数据存储到本地
+        setItem('TOUTIAO_CAHNNELS', this.myChannels)
+      }
     },
     onMyChannelClick (channel, index) {
       // console.log(channel, index);
@@ -147,10 +170,26 @@ export default {
         }
         // 删除myChannels中的元素
         this.myChannels.splice(index, 1)
+        // 将删除事件单独封装成一个函数
+        this.deleteChannel(channel)
       } else {
         // 非编辑状态，执行切换频道
         // 子组件无法改变父组件的值，向父组件传值
         this.$emit('update-active', index)
+      }
+    },
+    async deleteChannel (channel) {
+      if (this.user) {
+        // 登录状态
+        try {
+          await removeUserChannels(channel.id)
+        } catch (err) {
+          this.$toast('操作失败')
+        }
+      } else {
+        // 没有登录的状态,将数据更新到本地
+        // 什么的有数组的删除方法，删除后重新存储到本地就实现了删除的方法
+        setItem('TOUTIAO_CAHNNELS', this.myChannels)
       }
     }
   }
