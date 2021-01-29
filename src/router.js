@@ -46,6 +46,14 @@ const routes = [{
         name: 'search',
         component: () =>
             import ('@/views/search') // @指向的是src这个目录
+    },
+    {
+        path: '/article/:articleId',
+        name: 'article',
+        component: () =>
+            import ('@/views/article'), // @指向的是src这个目录
+
+        props: true
     }
 ]
 

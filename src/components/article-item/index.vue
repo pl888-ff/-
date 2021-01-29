@@ -1,5 +1,9 @@
 <template>
-  <van-cell class="article-item" title="单元格">
+  <van-cell
+    class="article-item"
+    title="单元格"
+    :to="`/article/${article.art_id}`"
+  >
     <!-- 标题 -->
     <div slot="title">{{ article.title }}</div>
     <div slot="label">
