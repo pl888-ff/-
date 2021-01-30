@@ -27,26 +27,40 @@
             slot="icon"
             round
             fit="cover"
-            src="https://img.yzcdn.cn/vant/cat.jpeg"
+            :src="article.aut_photo"
           />
           <div slot="title" class="user-name">{{ article.aut_name }}</div>
           <div slot="label" class="publish-date">
             {{ article.pubdate | relativeTime }}
           </div>
+
+          <follow-user
+            class="followed-btn"
+            :is-followed="article.is_followed"
+            :user-id="article.aut_id"
+            @update-is_followed="article.is_followed = $event"
+          />
+          <!-- <van-button
+            v-if="article.is_followed"
+            class="follow-btn"
+            round
+            size="small"
+            @click="onFollow"
+            :loading="followLoading"
+            >已关注</van-button
+          >
           <van-button
+            v-else
             class="follow-btn"
             type="info"
             color="#3296fa"
             round
             size="small"
             icon="plus"
+            @click="onFollow"
+            :loading="followLoading"
             >关注</van-button
-          >
-          <!-- <van-button
-            class="follow-btn"
-            round
-            size="small"
-          >已关注</van-button>-->
+          > -->
         </van-cell>
 
         <!-- 文章内容 -->
@@ -56,6 +70,47 @@
           ref="article-content"
         ></div>
         <van-divider>正文结束</van-divider>
+        <!-- 评论列表 -->
+        <comment-list
+          :source="article.art_id"
+          @onload-success="countTotal = $event.total_count"
+          :list="commentList"
+        />
+        <!-- /评论列表 -->
+
+        <!-- 底部区域 -->
+        <div class="article-bottom">
+          <van-button
+            class="comment-btn"
+            type="default"
+            round
+            size="small"
+            @click="isPostShow = true"
+            >写评论</van-button
+          >
+          <van-icon name="comment-o" :badge="countTotal" color="#777" />
+          <Collect-article
+            class="btn-item"
+            v-model="article.is_collected"
+            :article-id="article.art_id"
+          />
+          <!-- <van-icon color="#777" name="star-o" /> -->
+          <like-article
+            class="btn-item"
+            v-model="article.attitude"
+            :article-id="article.art_id"
+          />
+          <!-- <van-icon color="#777" name="good-job-o" /> -->
+          <van-icon name="share" color="#777777"></van-icon>
+        </div>
+        <!-- 弹出层 -->
+        <van-popup v-model="isPostShow" position="bottom">
+          <comment-post
+            :target="article.art_id"
+            @post-success="onPostSuccess"
+          />
+        </van-popup>
+        <!-- /弹出层 -->
       </div>
 
       <!-- 加载失败：404 -->
@@ -71,17 +126,6 @@
         <van-button class="retry-btn" @click="loadArticle">点击重试</van-button>
       </div>
     </div>
-
-    <!-- 底部区域 -->
-    <div class="article-bottom">
-      <van-button class="comment-btn" type="default" round size="small"
-        >写评论</van-button
-      >
-      <van-icon name="comment-o" badge="123" color="#777" />
-      <van-icon color="#777" name="star-o" />
-      <van-icon color="#777" name="good-job-o" />
-      <van-icon name="share" color="#777777"></van-icon>
-    </div>
   </div>
 </template>
 
@@ -89,14 +133,34 @@
 import { getArticleById } from '@/api/article'
 // import JSONBig from 'json-bigint'
 import { ImagePreview } from 'vant'
+
+import FollowUser from '@/components/follow-user'
+import CollectArticle from '@/components/collect-article'
+import likeArticle from '@/components/like-article'
+
+import CommentList from './components/comment-list'
+import CommentPost from './components/comment-post'
+
+import { deleteFollow, addFollow } from '@/api/user'
 export default {
   name: 'articleContainer',
   data () {
     return {
       article: {}, // 文章详情
       loading: true, // 加载中的loading状态
-      errStatus: 0 // 失败的状态码
+      errStatus: 0, // 失败的状态码
+      followLoading: false,
+      countTotal: 0,
+      isPostShow: false, // 控制写评论的对话框的显示与影藏
+      commentList: [] // 评论列表，子组件来的
     }
+  },
+  components: {
+    FollowUser,
+    CollectArticle,
+    likeArticle,
+    CommentList,
+    CommentPost
   },
   // 使用组件props解耦
   props: {
@@ -162,6 +226,39 @@ export default {
           })
         }
       })
+    },
+
+    async onFollow () {
+      this.followLoading = true
+      try {
+        if (this.article.is_followed) {
+          // 关注   取消关注用户
+          const { data } = await deleteFollow(this.article.aut_id)
+          console.log(data)
+        } else {
+          // 没有关注   要关注
+          const { data } = await addFollow(this.article.aut_id)
+          console.log(data)
+        }
+        // 给这个状态取反
+        this.article.is_followed = !this.article.is_followed
+
+        this.followLoading = false
+      } catch (err) {
+        let message = '操作失败！请重试'
+        if (err.response && err.response.status === 400) {
+          message = '你不能关注你自己'
+        }
+        this.$toast(message)
+      }
+    },
+    // 评论事件函数
+    onPostSuccess (data) {
+      // 关闭弹出层
+      this.isPostShow = false
+      // 放置最新的评论
+      // 父组件操作子组件的数据，可以在vuex容器中操作，也可以在子组件中设置props将需要用到的数据传进来
+      this.commentList.unshift(data.new_obj)
     }
   }
 }
@@ -273,7 +370,7 @@ export default {
       line-height: 46px;
       color: #a7a7a7;
     }
-    .van-icon {
+    /deep/.van-icon {
       font-size: 40px;
       .van-info {
         font-size: 16px;
