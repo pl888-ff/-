@@ -75,6 +75,7 @@
           :source="article.art_id"
           @onload-success="countTotal = $event.total_count"
           :list="commentList"
+          @reply-click="onReplyClick"
         />
         <!-- /评论列表 -->
 
@@ -126,6 +127,25 @@
         <van-button class="retry-btn" @click="loadArticle">点击重试</van-button>
       </div>
     </div>
+
+    <!-- 回复消息弹出框 -->
+    <!-- 弹出层是懒渲染的，只有在第一次展示的时候才会渲染里面的内容 -->
+    <van-popup
+      v-model="isReplayShow"
+      position="bottom"
+      :style="{ height: '100%' }"
+    >
+      <!-- v-if 条件渲染
+      true：渲染元素节点
+      false：不渲染，解决了渲染一次后就不渲染回复列表，
+     -->
+      <comment-reply
+        v-if="isReplayShow"
+        :comment="currentComment"
+        @close="isReplayShow = false"
+      />
+    </van-popup>
+    <!-- /回复消息弹出框 -->
   </div>
 </template>
 
@@ -142,8 +162,14 @@ import CommentList from './components/comment-list'
 import CommentPost from './components/comment-post'
 
 import { deleteFollow, addFollow } from '@/api/user'
+import CommentReply from './components/comment-reply'
 export default {
   name: 'articleContainer',
+  provide: function () {
+    return {
+      articleId: this.articleId
+    }
+  },
   data () {
     return {
       article: {}, // 文章详情
@@ -152,7 +178,9 @@ export default {
       followLoading: false,
       countTotal: 0,
       isPostShow: false, // 控制写评论的对话框的显示与影藏
-      commentList: [] // 评论列表，子组件来的
+      commentList: [], // 评论列表，子组件来的
+      isReplayShow: false,
+      currentComment: {} // 评论项（当前评论的项）
     }
   },
   components: {
@@ -160,7 +188,8 @@ export default {
     CollectArticle,
     likeArticle,
     CommentList,
-    CommentPost
+    CommentPost,
+    CommentReply
   },
   // 使用组件props解耦
   props: {
@@ -259,6 +288,14 @@ export default {
       // 放置最新的评论
       // 父组件操作子组件的数据，可以在vuex容器中操作，也可以在子组件中设置props将需要用到的数据传进来
       this.commentList.unshift(data.new_obj)
+    },
+
+    // 评论回复
+    onReplyClick (comment) {
+      // console.log(comment);
+      // 将拿到的评论项传递给组件
+      this.currentComment = comment
+      this.isReplayShow = true
     }
   }
 }

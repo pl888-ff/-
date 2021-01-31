@@ -54,7 +54,15 @@ const routes = [{
             import ('@/views/article'), // @指向的是src这个目录
 
         props: true
-    }
+    },
+    {
+        path: '/user/profile',
+        name: 'user-profile',
+        component: () =>
+            import ('@/views/user-profile'), // @指向的是src这个目录
+
+
+    },
 ]
 
 const router = new Router({
