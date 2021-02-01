@@ -6,12 +6,7 @@
       <div class="base-info">
         <!-- 左边部分 -->
         <div class="left">
-          <van-image
-            src="https://img.yzcdn.cn/vant/cat.jpeg"
-            round
-            class="avater"
-            fit="cover"
-          />
+          <van-image :src="userinfo.photo" round class="avater" fit="cover" />
           <span class="name">{{ userinfo.name }}</span>
         </div>
         <!-- 右边部分 -->
@@ -104,7 +99,7 @@ export default {
         })
         .then(() => {
           // on confirm
-          console.log('确认执行这里')
+          // console.log('确认执行这里')
           // 确认退出，清楚登录状态（容器中的user+本地存储中的token）
           // 这里直接调用setUser这个函数，将里面的数据清空就做到了清楚容器中的
           // user，因为整个setUser是直接跟本地存储挂钩的，会执行本地清楚
@@ -112,7 +107,7 @@ export default {
         })
         .catch(() => {
           // on cancel
-          console.log('取消执行这里')
+          // console.log('取消执行这里')
         })
     },
     // 获取用户信息
@@ -125,6 +120,7 @@ export default {
         // console.log(err);
         this.$toast('获取数据失败')
       }
+      // console.log(this.userinfo);
     }
   },
   computed: {
